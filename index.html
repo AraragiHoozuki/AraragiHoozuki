@@ -148,6 +148,86 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/02/26/rmmz-ui-window-3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Araragi Hoozuki">
+      <meta itemprop="description" content="Domus Hominis Ludentis">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="永远庭">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2021/02/26/rmmz-ui-window-3/" class="post-title-link" itemprop="url">RMMZ-从0开始构建自己的UI(3)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">نُشر في</span>
+              
+
+              <time title="أُنشأ: 2021-02-26 21:09:18 / عُدل: 22:32:53" itemprop="dateCreated datePublished" datetime="2021-02-26T21:09:18+08:00">2021-02-26</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>接下来就是重头戏了，实现窗口的滚动效果。（仅Y轴滚动，如果要加入X轴滚动把Y轴内容复制一遍即可）</p>
+<h2 id="基础滚动"><a href="#基础滚动" class="headerlink" title="基础滚动"></a>基础滚动</h2><p>首先我们要继承之前的<code>CustomWindow</code>类，实现基本的外观以及点击交互效果。滚动效果的实现主要通过 <code>Sprite.setFrame(x, y, w, h)</code>方法，这个是个RMMV、MZ原生方法，效果是使 Sprite 仅显示其 Bitamp 的指定部分，我们事先画一个特别长的 Bitmap，比如600高度，然后根据滚动值显示其中的一部分，比如窗口高度300，滚动值100，那么 <code>Sprite.setFrame(100, y, w, 300)</code>， 就只会显示高度100~400的区域，不断更新显示区域，就实现了滚动效果。</p>
+<p><img src="https://i.loli.net/2021/02/26/7fUGcLiJkMgjbvn.png" alt="2021-02-26_22-27-11.png"></p>
+<p>当然在这之前，我们需要先判定Bitmap的总高度，并记录滚动值：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ScrollWindow</span> <span class="keyword">extends</span> <span class="title">CustomWindow</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">_scrollMin = <span class="number">0</span>; <span class="comment">//最小滚动值，注意往上滚动是负数值，这个最小滚动值就是网上滚动的最大距离，相应的 Bitmap 高度就是窗口高度-最小滚动值；比如窗口高300，最小滚动值-200，那么就是可以最多向上滚动200距离，而整个 Bitmap的高度为500.</span></span><br><span class="line">_scrollMax = <span class="number">0</span>; <span class="comment">//一般默认为0，不能从初始位置向上滚动</span></span><br><span class="line">_scroll = <span class="number">0</span>; <span class="comment">//当前的滚动值</span></span><br><span class="line">_scrolling = <span class="number">0</span>; <span class="comment">//临时滚动值，即按下鼠标后移动的距离，松开鼠标后清零并归入 _scroll 中</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">get</span> <span class="title">scroll</span>() &#123;<span class="keyword">return</span> <span class="built_in">this</span>._scroll + <span class="built_in">this</span>._scrolling;&#125; <span class="comment">//实时总滚动值</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来便是相应鼠标操作改变滚动值：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//在update函数中加入该函数，记录当前鼠标于按下时位置的 y 轴差值作为临时滚动值。</span></span><br><span class="line"><span class="comment">// Clickable._pressPoint 的定义如果忘记请参照之前内容</span></span><br><span class="line"><span class="function"><span class="title">UpdateScroll</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span>.IsPressed()) &#123;</span><br><span class="line">        <span class="keyword">const</span> y = TouchInput.y;</span><br><span class="line">        <span class="built_in">this</span>._scrolling = y - <span class="built_in">this</span>._pressPoint.y;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//释放鼠标时，将临时滚动值并入，同时清空临时滚动值</span></span><br><span class="line"><span class="function"><span class="title">OnRelease</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>.OnRelease();</span><br><span class="line">    <span class="built_in">this</span>._scroll += <span class="built_in">this</span>._scrolling;</span><br><span class="line">    <span class="built_in">this</span>._scrolling = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来耀根据滚动值设置 Bitmap的显示区域，比较简单：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">UpdateContentScroll</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="built_in">this</span>._contentSprite.setFrame(<span class="number">0</span>, -<span class="built_in">this</span>.scroll, <span class="built_in">this</span>.width, <span class="built_in">this</span>.contentHeight);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="滚动极限"><a href="#滚动极限" class="headerlink" title="滚动极限"></a>滚动极限</h2><p>这一部分主要实现滚动超过边界时的“回弹”效果。首先需要设定边界值：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 改变滚动极限值会改变Bitmap尺寸，因此需要重新绘制 content</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param <span class="type">&#123;number&#125;</span> <span class="variable">l</span></span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="function"><span class="title">SetContentLength</span>(<span class="params">l</span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> ( l &gt; <span class="built_in">this</span>.contentHeight) &#123;</span><br><span class="line">            <span class="built_in">this</span>._scrollMin = <span class="built_in">this</span>.contentHeight - l; <span class="comment">//这里以内容总高度l作为参数，则 _scrollMin 就是(窗口高度 - l)</span></span><br><span class="line">            <span class="built_in">this</span>.RefreshContent();</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.content.clear();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="title">RefreshContent</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="built_in">this</span>._contentSprite.bitmap = <span class="keyword">new</span> Bitmap(<span class="built_in">this</span>.contentWidth, <span class="built_in">this</span>.contentHeight - <span class="built_in">this</span>._scrollMin);</span><br><span class="line">        <span class="built_in">this</span>._contentSprite.move(<span class="built_in">this</span>.paddings.left, <span class="built_in">this</span>._titleHeight + <span class="built_in">this</span>.paddings.top);</span><br><span class="line">        <span class="built_in">this</span>.UpdateContentScroll();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>处理超过边界时的回弹效果,，我这里的做法时超过边界时，每次update减少超过值得1/3，可以根据实际效果用不同的值，看个人喜好了：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">UpdateBorderBouncing</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span>._scroll &gt; <span class="built_in">this</span>._scrollMax) &#123;</span><br><span class="line">        <span class="built_in">this</span>._scroll -= (<span class="built_in">this</span>._scroll - <span class="built_in">this</span>._scrollMax) / <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>._scroll - <span class="built_in">this</span>._scrollMax &lt; <span class="number">1</span>) <span class="built_in">this</span>._scroll = <span class="built_in">this</span>._scrollMax;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">this</span>._scroll &lt; <span class="built_in">this</span>._scrollMin) &#123;</span><br><span class="line">        <span class="built_in">this</span>._scroll -= (<span class="built_in">this</span>._scroll - <span class="built_in">this</span>._scrollMin) / <span class="number">3</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>._scrollMin - <span class="built_in">this</span>._scroll &lt; <span class="number">1</span>) <span class="built_in">this</span>._scroll = <span class="built_in">this</span>._scrollMin;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="滚动惯性"><a href="#滚动惯性" class="headerlink" title="滚动惯性"></a>滚动惯性</h2><p>也就是在松开鼠标后，滚动不会立即停止，而是会继续滑动一段距离。且松开前鼠标移动得越快，应该滑动初速度也应该越快，并随时间而减小，知道静止：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">_inertia = <span class="number">0</span>; <span class="comment">//记录当前的惯性滑动速度</span></span><br><span class="line">_lastY = <span class="number">0</span>; <span class="comment">//记录上一帧的滚动 y 值，以便和当前帧比较，得出该帧 y 的改变量，也就是滚动速度</span></span><br><span class="line"><span class="comment">//改造 UpdateScroll 函数如下：</span></span><br><span class="line">    <span class="function"><span class="title">UpdateScroll</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="built_in">this</span>.IsPressed()) &#123;</span><br><span class="line">            <span class="keyword">const</span> y = TouchInput.y;</span><br><span class="line">            <span class="built_in">this</span>._scrolling = y - <span class="built_in">this</span>._pressPoint.y;</span><br><span class="line">            <span class="built_in">this</span>._inertia = y - <span class="built_in">this</span>._lastY;</span><br><span class="line">            <span class="built_in">this</span>._lastY = y;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>接下来处理松开后的惯性即可：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//惯性速度衰减值，我计划所有窗口都是一样的，所以作为静态属性，如果希望各个不同可以改为成员属性</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">get</span> <span class="title">inertiaAttenuation</span>() &#123; <span class="keyword">return</span> <span class="number">0.94</span>; &#125; </span><br><span class="line">   <span class="function"><span class="title">UpdateInertia</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">       <span class="keyword">if</span> (!<span class="built_in">this</span>.IsPressed() &amp;&amp; (<span class="built_in">this</span>._inertia &gt; <span class="number">1</span> || <span class="built_in">this</span>._inertia &lt; -<span class="number">1</span>)) &#123; <span class="comment">//只有在鼠标松开时惯性生效</span></span><br><span class="line">           <span class="built_in">this</span>._scroll += <span class="built_in">this</span>._inertia;</span><br><span class="line">           <span class="built_in">this</span>._inertia = <span class="built_in">this</span>._inertia * ScrollWindow.inertiaAttenuation;</span><br><span class="line">       &#125;</span><br><span class="line">   &#125;</span><br></pre></td></tr></table></figure>
+<h2 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h2><p>最后把需要帧更新的放到 update 中就完成了</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="title">update</span>(<span class="params"></span>)</span> &#123;</span><br><span class="line">    <span class="built_in">super</span>.update();</span><br><span class="line">    <span class="built_in">this</span>.UpdateInertia();</span><br><span class="line">    <span class="built_in">this</span>.UpdateScroll();</span><br><span class="line">    <span class="built_in">this</span>.UpdateBorderBouncing();</span><br><span class="line">    <span class="built_in">this</span>.UpdateContentScroll();</span><br><span class="line">    <span class="built_in">this</span>.UpdateScrollBar();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="https://i.loli.net/2021/02/26/Axg9Zb2RnL1OMDC.gif" alt="2021-02-26_22-23-33.gif"></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-Hans">
     <link itemprop="mainEntityOfPage" href="http://example.com/2020/12/26/rmmz-ui-window/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -363,7 +443,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">2</span>
+          <span class="site-state-item-count">3</span>
           <span class="site-state-item-name">المقالات</span>
         </a>
       </div>

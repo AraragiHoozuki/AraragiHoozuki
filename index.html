@@ -162,7 +162,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2021/08/09/feh-editor/" class="post-title-link" itemprop="url">Feh Editor</a>
+            <a href="/2021/08/09/feh-editor/" class="post-title-link" itemprop="url">Feh Map Editor</a>
         </h2>
 
         <div class="post-meta">
@@ -171,10 +171,16 @@
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2021-08-09 15:47:14 / 修改时间：15:56:29" itemprop="dateCreated datePublished" datetime="2021-08-09T15:47:14+08:00">2021-08-09</time>
+              <time title="创建时间：2021-08-09 15:47:14" itemprop="dateCreated datePublished" datetime="2021-08-09T15:47:14+08:00">2021-08-09</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2022-02-05 10:45:51" itemprop="dateModified" datetime="2022-02-05T10:45:51+08:00">2022-02-05</time>
+              </span>
 
           
 
@@ -187,14 +193,44 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>Write feh archive files (.bin.lz) from json.<br><strong>Now only support SRPGMap files</strong></p>
-<h2 id="Instrucctions"><a href="#Instrucctions" class="headerlink" title="Instrucctions"></a>Instrucctions</h2><ul>
-<li>Put json and the original archive in the same folder.</li>
-<li>Make sure they have same name (excluding extension)</li>
-<li>Backup the original archive</li>
-<li>Drag json file on the exe and the archive will be overwritten</li>
+          <blockquote>
+<p>一个《火焰纹章：英雄》地图文件编辑工具<br>作者: <a href="mailto:&#x61;&#x72;&#97;&#x72;&#97;&#x67;&#x69;&#46;&#104;&#111;&#111;&#x7a;&#x75;&#x6b;&#105;&#64;&#x79;&#x61;&#x6e;&#x64;&#x65;&#x78;&#46;&#114;&#117;">&#x61;&#x72;&#97;&#x72;&#97;&#x67;&#x69;&#46;&#104;&#111;&#111;&#x7a;&#x75;&#x6b;&#105;&#64;&#x79;&#x61;&#x6e;&#x64;&#x65;&#x78;&#46;&#114;&#117;</a> (贴吧 bombra, Nga 罗恩格林妮)</p>
+</blockquote>
+<h2 id="需要资源文件"><a href="#需要资源文件" class="headerlink" title="需要资源文件"></a>需要资源文件</h2><ul>
+<li>root/Face: 存放头像文件，</li>
+<li>root/Field: 存放地图背景文件</li>
+<li>root/SRPG/Person: 存放角色文件</li>
+<li>root/SRPG/Skill: 存放技能文件</li>
+<li>root/UI: 存放UI相关文件（仅需要 MiniFace.png, Skill_Passive*.png, Status.png）</li>
+<li>root/Data: 存放文本说明文件<br>以上文件均可以从游戏数据包中获取，文本说明文件在对应的语言文件夹下。缺少文件可能会导致程序无法打开或者崩溃</li>
 </ul>
-<h2 id="Json-example"><a href="#Json-example" class="headerlink" title="Json example"></a>Json example</h2><h3 id="SRPGMap"><a href="#SRPGMap" class="headerlink" title="SRPGMap"></a>SRPGMap</h3><figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"></span><br></pre></td></tr></table></figure>
+<h2 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h2><h3 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h3><ul>
+<li>netcore 5.0</li>
+<li>600+ MB 内存。图像缓存占大头，懒得优化（<h3 id="读取地图文件"><a href="#读取地图文件" class="headerlink" title="读取地图文件"></a>读取地图文件</h3>点击 Load SRPGMap 按钮，在弹出的窗口中选择需要的地图配置文件（地图文件位于游戏数据 files/assets/common/srpgmap/*.bin.lz）,建议选择 S 开头的文件（剧情地图）。然后点击地图上的格子以选取</li>
+</ul>
+<h3 id="地形编辑"><a href="#地形编辑" class="headerlink" title="地形编辑"></a>地形编辑</h3><ul>
+<li>Field id: 地图背景文件，对应 Field 目录下的文件，修改后重新载入地图才会刷新，修改成不存在的文件会出错（应该）</li>
+<li>Selected Coordiante: 显示当前选择的格子坐标</li>
+<li>Terrain Type: 当前选择的格子地形，修改可能会造成地图无法在游戏中载入</li>
+</ul>
+<h3 id="角色编辑"><a href="#角色编辑" class="headerlink" title="角色编辑"></a>角色编辑</h3><ul>
+<li>Unit Id: 角色id，双击打开角色选择窗口，第一次打开时会卡一会，读取头像数据。然后点击角色名选择，id会自动填入。删除id会删除该角色。</li>
+<li>Lv: 等级</li>
+<li>Tlv: 真实等级，等级为40，真实等级为40以上时，游戏里显示为40+</li>
+<li>SpecialCD: 开局时奥义cd，255 为默认，0为就绪状态</li>
+<li>HP等: 属性，直接修改即可，超过99无效。选择 Unit Id时，属性会自动填入满破标准属性作为参考</li>
+<li>Is Enemy?: 0 表示友军，1表示敌人</li>
+<li>技能栏: 双击弹出技能选择窗口，然后双击技能选择</li>
+</ul>
+<p>以上手动输入的地方，需要输入后点击其他输入框以确认，否则数据不会更新<br>新增角色时，需要再点击一次地图上的格子以刷新显示</p>
+<h3 id="保存"><a href="#保存" class="headerlink" title="保存"></a>保存</h3><p>点击 Save Map 保存文件，会自动覆盖原文件（也必须覆盖原文件，因此保存前请勿删除或移动原文件）。覆盖前建议备份原文件。</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><ul>
+<li>敌方专属角色（大众脸等），在地图上头像会显示为全黑，以后有心情再增加头像（</li>
+<li>一个位置只能设置一个角色，因此部分有增援敌人的地图，如果有增援敌人在同一位置出现，会丢失部分信息。当然，暂时也还不支持设置增援信息</li>
+</ul>
+<h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p><a href="pan.baidu.com/s/1eE_lTA4u9eSjbXLXCM1nUg">百度盘</a></p>
+<p>提取码：bdm4</p>
+
       
     </div>
 
@@ -666,7 +702,7 @@
 <div class="copyright">
   
   &copy; 
-  <span itemprop="copyrightYear">2021</span>
+  <span itemprop="copyrightYear">2022</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

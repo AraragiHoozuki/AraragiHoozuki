@@ -148,6 +148,96 @@
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2022/02/20/feh-editor-en/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Araragi Hoozuki">
+      <meta itemprop="description" content="Domus Hominis Ludentis">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="永远庭">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2022/02/20/feh-editor-en/" class="post-title-link" itemprop="url">Feh Map Editor 1.0 (English)</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2022-02-20 11:24:29 / 修改时间：11:51:46" itemprop="dateCreated datePublished" datetime="2022-02-20T11:24:29+08:00">2022-02-20</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>A map editor for Fire Emblem Heroes<br>Author: <a href="mailto:&#x61;&#114;&#x61;&#114;&#x61;&#103;&#105;&#x2e;&#104;&#111;&#x6f;&#x7a;&#x75;&#107;&#105;&#64;&#121;&#x61;&#x6e;&#x64;&#x65;&#x78;&#x2e;&#x72;&#x75;">&#x61;&#114;&#x61;&#114;&#x61;&#103;&#105;&#x2e;&#104;&#111;&#x6f;&#x7a;&#x75;&#107;&#105;&#64;&#121;&#x61;&#x6e;&#x64;&#x65;&#x78;&#x2e;&#x72;&#x75;</a> (Lohengriny)</p>
+</blockquote>
+<h2 id="Resources"><a href="#Resources" class="headerlink" title="Resources"></a>Resources</h2><ul>
+<li>root/Face: Face Images，</li>
+<li>root/Field: Map backgrounds</li>
+<li>root/SRPG/Person: Unit files</li>
+<li>root/SRPG/Skill: Skill files</li>
+<li>root/UI: Ui（<em>MiniFace.png</em>, <em>Skill_Passive.png</em> and <em>Status.png</em> are needed）</li>
+<li>root/Data: text files<br><strong>Just copy these files from game folder(app.nintendo.zaba/files/assets/)</strong></li>
+</ul>
+<h2 id="Environments"><a href="#Environments" class="headerlink" title="Environments"></a>Environments</h2><ul>
+<li>netcore 5.0</li>
+<li>700+ MB RAM (Because of face image cache, too lazy to improove this XDD) </li>
+</ul>
+<h2 id="Instructions"><a href="#Instructions" class="headerlink" title="Instructions"></a>Instructions</h2><h3 id="Load-Map"><a href="#Load-Map" class="headerlink" title="Load Map"></a>Load Map</h3><p>Click “Load SRPGMap”，and select a map file(map files are placed at files/assets/common/srpgmap/*.bin.lz), it is recommended to select maps whose name starts with S, which are story maps.</p>
+<h3 id="Terrain-Edit"><a href="#Terrain-Edit" class="headerlink" title="Terrain Edit"></a>Terrain Edit</h3><ul>
+<li>Field id: Backgroud  image name，relaod map if changed.</li>
+<li>Selected Coordiante: x, y value of selected tile</li>
+<li>Terrain Type: 当前选择的格子地形，修改可能会造成地图无法在游戏中载入</li>
+</ul>
+<h3 id="Unit-edit"><a href="#Unit-edit" class="headerlink" title="Unit edit"></a>Unit edit</h3><ul>
+<li>Unit Id:  Double click and select an unit. Delete this to delete an unit</li>
+<li>Lv: level</li>
+<li>Tlv: true level</li>
+<li>SpecialCD: 255 for default, 0 for special ready </li>
+<li>HP etc: Has a cap of 99。When you select a unit in the “unit id” slot, these field will be automatically filled.</li>
+<li>Is Enemy?: 0 for ally，1 for enemy</li>
+<li>Skills: Double click to open skill list window，and double click to select a skill</li>
+</ul>
+<h3 id="Save"><a href="#Save" class="headerlink" title="Save"></a>Save</h3><p>Click “Save Map” to save your edited map，the program needs overwrite the original file. So do not rename, move or delete the original map file.</p>
+<h3 id="Download"><a href="#Download" class="headerlink" title="Download"></a>Download</h3><p><a target="_blank" rel="noopener" href="https://www.dropbox.com/s/6pvuyyhtbs2rpue/FEHMapEditor-Release1.0.zip?dl=0">Dropbox</a></p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
     <link itemprop="mainEntityOfPage" href="http://example.com/2021/08/09/feh-editor/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -674,7 +764,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-count">7</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
